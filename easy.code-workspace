@@ -62,8 +62,20 @@
 			"warning"
 		],
 		// PYTHON extra libs
-		"python.analysis.extraPaths": [
-			"./libs/"
+		"python.analysis.extraPaths": [],
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "BASIC",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${workspaceFolder}/tests/basic.py",
+				"console": "integratedTerminal",
+				"args": []
+			}
 		],
+		"compounds": []
 	}
 }

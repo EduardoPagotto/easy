@@ -14,6 +14,8 @@ from tinydb.storages import Storage
 
 logger = logging.getLogger(__name__)
 
+__all__ = ('DumpStor')
+
 class DumpStor(Storage):
 
     WRITE_CACHE_SIZE = 30

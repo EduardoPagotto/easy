@@ -12,6 +12,8 @@ from tinydb.table import Table
 
 logger = logging.getLogger(__name__)
 
+__all__ = ('EasyAcc')
+
 class EasyAcc(object):
     def __init__(self, foldername : str, database: str, storage : Storage):
         self._foldername = foldername
