@@ -1,6 +1,6 @@
 '''
 Created on 20241209
-Update on 20250210
+Update on 20250220
 @author: Eduardo Pagotto
 '''
 
@@ -56,7 +56,6 @@ class SSHFS(object):
 
         self.conn = conn
         self.ro = ro
-        #self.log = logging.getLogger('OCP2.SSHFS')
         self.local = self.conn['local'] if not local else local
 
         # Forca a desmontagem e criacao do diretorio
@@ -113,8 +112,6 @@ class SSHFS(object):
                                 executable='/bin/sh')
 
             if result.returncode != 0:
-                #logger.error('stderr: %s', result.stderr)
-                #logger.error('stdout: %s', result.stdout)
                 raise Exception(f"Falha na montagem: {result.stderr}")
 
         except Exception as exp:

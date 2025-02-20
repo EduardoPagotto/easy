@@ -1,6 +1,6 @@
 '''
 Created on 20250208
-Update on 20250210
+Update on 20250220
 @author: Eduardo Pagotto
 '''
 
@@ -29,16 +29,11 @@ class DumpStor(Storage):
 
         self.cache = None
         self._cache_modified_count = 0
-        self._cache_miss_read = 0
-        self._cache_miss_write = 0
 
     def read(self)-> Optional[Dict[str, Dict[str, Any]]]:
 
         if self.cache:
             return self.cache
-
-        self._cache_miss_read += 1
-        #logger.info('read %d', self._cache_miss_read)
 
         try:
             with open(self.filename, 'r') as handle:
@@ -75,9 +70,6 @@ class DumpStor(Storage):
 
         self._cache_modified_count = 0
 
-        self._cache_miss_write += 1
-        #logger.info('write %d', self._cache_miss_write)
-
         self.tot_write += 1
         self.tot_read += self.last_read
         self.cache['_SystemDB'] = {'reads': self.tot_read, 'writes':self.tot_write,'last_save':datetime.now().isoformat()}
@@ -98,5 +90,3 @@ class DumpStor(Storage):
         self.last_read = 0
         self.cache = None
         self._cache_modified_count = 0
-        self._cache_miss_read = 0
-        self._cache_miss_write = 0
