@@ -1,0 +1,69 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		// Editor settings
+		"editor.tabSize": 4,
+		"editor.rulers": [
+			80,
+			120
+		],
+		// Editor
+		// "editor.hover.hidingDelay": 500,
+		// "editor.occurrencesHighlight": "off",
+		"editor.selectionHighlight": false,
+		"editor.suggestSelection": "recentlyUsed",
+		"editor.formatOnSave": true,
+		"editor.minimap.enabled": false,
+		"editor.fontFamily": "JetBrains Mono",
+		"editor.fontSize": 15,
+		"editor.fontWeight": "normal",
+		"editor.fontLigatures": true,
+		"editor.letterSpacing": 0.8,
+		"editor.lineHeight": 1.5,
+		"editor.smoothScrolling": true,
+		"editor.suggest.preview": true,
+		"editor.cursorSmoothCaretAnimation": "on",
+		"editor.cursorStyle": "underline",
+		// Terminal
+		"terminal.integrated.letterSpacing": 0.8,
+		"terminal.integrated.fontWeight": "normal",
+		"terminal.integrated.defaultProfile.windows": "Command Prompt",
+		"terminal.integrated.fontFamily": "JetBrains Mono",
+		"terminal.integrated.lineHeight": 1.0,
+		"terminal.integrated.fontSize": 15,
+		"terminal.integrated.cursorStyle": "underline",
+		"terminal.integrated.cursorBlinking": true,
+		"terminal.integrated.cursorStyleInactive": "underline",
+		"terminal.integrated.fontLigatures": true,
+		// Explorer
+		"explorer.compactFolders": false,
+		"explorer.confirmDragAndDrop": false,
+		"explorer.confirmDelete": false,
+		"explorer.copyRelativePathSeparator": "/",
+		// Files
+		"files.autoSave": "onFocusChange",
+		"files.insertFinalNewline": true,
+		"files.trimFinalNewlines": true,
+		"files.trimTrailingWhitespace": true,
+		// Git
+		"git.enableSmartCommit": true,
+		"git.autofetch": true,
+		"git.confirmSync": false,
+		"git.openRepositoryInParentFolders": "always",
+		// Error Lens
+		"errorLens.enabled": true,
+		"errorLens.delay": 1000,
+		"errorLens.enabledDiagnosticLevels": [
+			"error",
+			"warning"
+		],
+		// PYTHON extra libs
+		"python.analysis.extraPaths": [
+			"./libs/"
+		],
+	}
+}
