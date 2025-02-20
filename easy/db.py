@@ -12,9 +12,9 @@ from tinydb.table import Table
 
 logger = logging.getLogger(__name__)
 
-__all__ = ('EasyAcc')
+__all__ = ('DB')
 
-class EasyAcc(object):
+class DB(object):
     def __init__(self, foldername : str, database: str, storage : Storage):
         self._foldername = foldername
         try:

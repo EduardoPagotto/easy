@@ -5,8 +5,8 @@ Update on 20250210
 '''
 
 from .store import DumpStor
-from .easy import EasyAcc
+from .db import DB
 from .serializers import DateTimeSerializer
 from .sshfs import SSHFS
 
-__all__ = ('DumpStor', 'EasyAcc', 'DateTimeSerializer', 'SSHFS')
+__all__ = ('DumpStor', 'DB', 'DateTimeSerializer', 'SSHFS')
