@@ -17,16 +17,11 @@ sys.path.append('.')
 from easy import SSHFS, DB, DumpStor
 
 # Dados de conexao do host
-SFTP_DATA = {"host": "192.168.0.102",
-             "user": "uctest",
-             "passwd": "Zaq12wsX",
-             "remote": ".",
-             "local": "/mnt/remote"}
-# SFTP_DATA = {'host': '127.0.0.1',
-#              'user': 'remote01',
-#              'passwd': 'ZZZZZ',
-#              'remote': '.',
-#              'local': '/mnt/shared'}
+SFTP_DATA = {'host': '127.0.0.1',
+             'user': 'remote01',
+             'passwd': 'ZZZZZ',
+             'remote': '.',
+             'local': '/mnt/shared'}
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
