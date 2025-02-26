@@ -74,6 +74,14 @@
 				"program": "${workspaceFolder}/tests/basic.py",
 				"console": "integratedTerminal",
 				"args": []
+			},
+			{
+				"name": "REMOTO",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${workspaceFolder}/tests/remoto.py",
+				"console": "integratedTerminal",
+				"args": []
 			}
 		],
 		"compounds": []

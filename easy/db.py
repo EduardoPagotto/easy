@@ -1,6 +1,6 @@
 '''
 Created on 20250208
-Update on 20250210
+Update on 20250226
 @author: Eduardo Pagotto
 '''
 
@@ -12,10 +12,10 @@ from tinydb.table import Table
 
 logger = logging.getLogger(__name__)
 
-__all__ = ('DB')
+__all__ = ('JsonDB')
 
-class DB(object):
-    def __init__(self, foldername : str, database: str, storage : Storage):
+class JsonDB(object):
+    def __init__(self, foldername : str, database: str, storage : Storage, cache_size : int = 50):
         self._foldername = foldername
         try:
             os.mkdir(foldername)
@@ -26,7 +26,8 @@ class DB(object):
 
         self.tinydb = TinyDB(
             os.path.join(foldername, database + u".json"),
-            storage=storage
+            storage=storage,
+            cache_size = cache_size
         )
 
     def __enter__(self):

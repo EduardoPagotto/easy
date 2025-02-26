@@ -1,6 +1,6 @@
 '''
 Created on 20250208
-Update on 20250220
+Update on 20250226
 @author: Eduardo Pagotto
 '''
 
@@ -17,18 +17,17 @@ logger = logging.getLogger(__name__)
 __all__ = ('DumpStor')
 
 class DumpStor(Storage):
-
-    WRITE_CACHE_SIZE = 30
-
-    def __init__(self, filename):
+    def __init__(self, filename : str, cache_size : int):
 
         self.filename = filename
+        self.cache_size = cache_size
         self.last_read = 0
         self.tot_read = 0
         self.tot_write = 0
 
         self.cache = None
         self._cache_modified_count = 0
+        self._cache_burst = 0
 
     def read(self)-> Optional[Dict[str, Dict[str, Any]]]:
 
@@ -48,9 +47,11 @@ class DumpStor(Storage):
                 return self.cache
 
         except json.JSONDecodeError:
-            return None
+            logger.error('malformed db: %s', self.filename)
         except FileNotFoundError:
-            return None
+            pass
+
+        return None
 
 
     def write(self, data: Dict[str, Dict[str, Any]]):
@@ -59,8 +60,9 @@ class DumpStor(Storage):
         self._cache_modified_count += 1
 
         # Check if we need to flush the cache
-        if self._cache_modified_count >= self.WRITE_CACHE_SIZE:
-            logger.warning('cache burst')
+        if self._cache_modified_count >= self.cache_size:
+            self._cache_burst += 1
+            logger.warning('cache burst: %d', self._cache_burst)
             self.flush()
 
     def flush(self):
@@ -82,11 +84,10 @@ class DumpStor(Storage):
         with open(self.filename, "w") as outfile:
             outfile.write(json_object)
 
-
     def close(self):
         self.flush()
         self.tot_read = 0
         self.tot_write = 0
         self.last_read = 0
         self.cache = None
-        self._cache_modified_count = 0
+        self._cache_burst = 0
