@@ -30,7 +30,7 @@ logger = logging.getLogger('lazzy')
 
 if __name__ == "__main__":
 
-    with JsonLazzyDB('dados_db', 'banco01', SFTP_DATA, storage=DumpStorSSH, cache_size=100) as db_remote:
+    with JsonLazzyDB('dados_db/lazzy', SFTP_DATA, storage=DumpStorSSH, cache_size=100) as db_remote:
 
         tbl : Table = db_remote.Tabela
 

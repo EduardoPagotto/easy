@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
         path_db = mnt_remote.get_path('dados_db')
 
-        with JsonDB(path_db, 'banco01', storage=DumpStor) as db_remote:
+        with JsonDB(path_db, 'remoto', storage=DumpStor) as db_remote:
 
             tbl : Table = db_remote.Tabela
 

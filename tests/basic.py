@@ -29,7 +29,7 @@ if __name__ == "__main__":
     Path(path_db).mkdir(parents=True, exist_ok=True)
 
     # Cria arquivo json banco01.json
-    with JsonDB(path_db, 'banco01', storage=DumpStor) as db_remote:
+    with JsonDB(path_db, 'basic', storage=DumpStor) as db_remote:
 
         # Cria ou referencia tabela se ja existir
         tbl : Table = db_remote.Tabela
