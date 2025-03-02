@@ -1,11 +1,12 @@
 '''
 Created on 20241209
-Update on 20250220
+Update on 20250301
 @author: Eduardo Pagotto
 '''
 
 import logging
 import os
+import time
 from pathlib import Path
 import subprocess
 from typing import Optional
@@ -14,33 +15,36 @@ logger = logging.getLogger(__name__)
 
 __all__ = ('SSHFS', 'desmontar')
 
-def desmontar(mount_point :str, log_data : bool = True) -> bool:
+def desmontar(mount_point :str) -> bool:
     """Desmonta unidade SSHDFS
 
     Args:
-        mount_map (str): ponde de desmontagem
+        mount_point (str): ponto de desmontagem
 
     Returns:
         bool: True se sucesso
     """
     try:
-        if log_data:
-            logger.info('umount %s', mount_point)
+        if os.path.ismount(mount_point):
+            os.sync()
+            logger.info('execute umount %s', mount_point)
+            time.sleep(0.5)
+        else:
+            return True
 
         result = subprocess.run(f"umount {mount_point}",
-                            text=True,
-                            shell=True,
-                            capture_output=True,
-                            executable='/bin/sh')
+                                text=True,
+                                shell=True,
+                                capture_output=True,
+                                executable='/bin/sh')
 
         if result.returncode != 0:
-            if log_data:
-                logger.warning('stderr: %s', result.stderr.replace('\n',''))
+            logger.warning('execute umount falhou: %s', result.stderr.replace('\n',''))
         else:
             return True
 
     except Exception as exp:
-        logger.error("umount %s falhou", str(exp.args))
+        logger.error("umount falhou %s", str(exp.args))
 
     return False
 
@@ -62,12 +66,13 @@ class SSHFS(object):
         try:
             # Cria Diretorio se não existe e desmonta share se app em reset
             if Path(self.local).is_dir():
-                desmontar(self.local, False)
+                desmontar(self.local)
             else:
-                logger.info('criar diretorio de montagem: %s', self.local)
+                logger.info('novo diretorio de montagem: %s', self.local)
                 Path(self.local).mkdir(parents=True, exist_ok=True)
         except:
             desmontar(self.local)
+            raise Exception("Falha SSHFS em %s", self.local)
 
     def get_local(self) -> str:
         """Retona o path montado

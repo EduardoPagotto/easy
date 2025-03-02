@@ -82,6 +82,14 @@
 				"program": "${workspaceFolder}/tests/remoto.py",
 				"console": "integratedTerminal",
 				"args": []
+			},
+			{
+				"name": "LAZZY",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${workspaceFolder}/tests/lazzy.py",
+				"console": "integratedTerminal",
+				"args": []
 			}
 		],
 		"compounds": []
