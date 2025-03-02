@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20250129
-Update on 20250129
+Update on 20250302
 @author: Eduardo Pagotto
 '''
 
@@ -26,7 +26,7 @@ SFTP_DATA = {"host": "192.168.0.102",
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
-logger = logging.getLogger('basic')
+logger = logging.getLogger('lazzy')
 
 if __name__ == "__main__":
 

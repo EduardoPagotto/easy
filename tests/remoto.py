@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20250129
-Update on 20250129
+Update on 20250302
 @author: Eduardo Pagotto
 '''
 
@@ -17,31 +17,27 @@ sys.path.append('.')
 from easy import SSHFS, JsonDB, DumpStor
 
 # Dados de conexao do host
-SFTP_DATA = {'host': '127.0.0.1',
-             'user': 'remote01',
-             'passwd': 'ZZZZZ',
-             'remote': '.',
-             'local': '/mnt/shared'}
+SFTP_DATA = {"host": "192.168.0.102",
+             "user": "uctest",
+             "passwd": "Zaq12wsX",
+             "remote": ".",
+             "local": "/mnt/remote_db"}
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
-logger = logging.getLogger('basic')
+logger = logging.getLogger('remoto')
 
 if __name__ == "__main__":
 
     # Monta SFTP para acesso ao DB
-    logger.info('Conecta ao sftp')
     with SSHFS(SFTP_DATA, False) as mnt_remote:
 
-        logger.info('Pega o path')
         path_db = mnt_remote.get_path('dados_db')
 
-        logger.info('Cria arquivo json banco01.json')
         with JsonDB(path_db, 'banco01', storage=DumpStor) as db_remote:
 
-            logger.info("Cria ou oega tabela se ja existir")
-            tbl : Table = db_remote.table('tabela')
+            tbl : Table = db_remote.Tabela
 
             id : int = 0
             rec = tbl.get(where('_id')=='info' )
@@ -54,6 +50,5 @@ if __name__ == "__main__":
                 id = tbl.insert(rec)
             else:
                 id = rec.doc_id
-
 
             logger.info('Result doc_id: %d val:%s', id, str(rec))
