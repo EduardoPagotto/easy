@@ -1,6 +1,6 @@
 '''
 Created on 20241209
-Update on 20250301
+Update on 20250305
 @author: Eduardo Pagotto
 '''
 
@@ -13,16 +13,16 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-__all__ = ('SSHFS', 'desmontar')
+__all__ = ('SSHFS', 'umount_point')
 
-def desmontar(mount_point :str) -> bool:
-    """Desmonta unidade SSHDFS
+def umount_point(mount_point :str) -> bool:
+    """umount SSHDFS
 
     Args:
-        mount_point (str): ponto de desmontagem
+        mount_point (str): umount point
 
     Returns:
-        bool: True se sucesso
+        bool: True to sucess
     """
     try:
         if os.path.ismount(mount_point):
@@ -50,32 +50,33 @@ def desmontar(mount_point :str) -> bool:
 
 class SSHFS(object):
     def __init__(self, conn : dict, ro: bool, local : Optional[str] = None):
-        """Monta unidade remota localmente com SSHFS
+        """Mount remote SSHFS
 
         Args:
-            conn (dict): Configuracoes de conexao e locais de acesso e montagem local
-            ro (bool): True monta remoto como Read Only
-            local (Optional[str], optional): Se dado sobrescreve montagem local FULL. Defaults to None.
+            conn (dict): data with user/host/pass of sftp server
+            ro (bool): True to mount remote sshfs as Read Only
+            local (Optional[str], optional): Overrite mount point in conn dictionary. Defaults to None.
         """
 
         self.conn = conn
         self.ro = ro
         self.local = self.conn['local'] if not local else local
 
-        # Forca a desmontagem e criacao do diretorio
         try:
-            # Cria Diretorio se não existe e desmonta share se app em reset
+            # if path nof mount point not exist, create
             if Path(self.local).is_dir():
-                desmontar(self.local)
+                umount_point(self.local)
             else:
+                # check if mount point already monted if is, dismount(old error connection status)
                 logger.info('novo diretorio de montagem: %s', self.local)
                 Path(self.local).mkdir(parents=True, exist_ok=True)
         except:
-            desmontar(self.local)
+            # any thing wrong Except
+            umount_point(self.local)
             raise Exception("Falha SSHFS em %s", self.local)
 
     def get_local(self) -> str:
-        """Retona o path montado
+        """Get mounted point
 
         Returns:
             str: path full
@@ -83,13 +84,13 @@ class SSHFS(object):
         return self.local
 
     def get_path(self, path : str) -> str:
-        """retorna o diretorio montado mais o parametro, e cria o mesmo se nao exitir
+        """returns the mounted directory plus the parameter, and creates the same if there is no
 
         Args:
-            path (str): diretorio a ser usado
+            path (str): directoru used to
 
         Returns:
-            str: combinação do local mais o path passado
+            str: joined loca plus path, create directory if not exist
         """
 
         new_path = os.path.join(self.get_local(), path)
@@ -103,6 +104,8 @@ class SSHFS(object):
 
 
     def __enter__(self):
+        """Use as a context manager."""
+
         try:
             str_ro = '-o ro' if self.ro else '-o rw'
 
@@ -125,4 +128,6 @@ class SSHFS(object):
         return self
 
     def __exit__(self, *err):
-        desmontar(self.local)
+        """Leaving a context."""
+
+        umount_point(self.local)

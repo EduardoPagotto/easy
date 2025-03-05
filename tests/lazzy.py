@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20250129
-Update on 20250302
+Update on 20250305
 @author: Eduardo Pagotto
 '''
 
@@ -30,7 +30,7 @@ logger = logging.getLogger('lazzy')
 
 if __name__ == "__main__":
 
-    with JsonLazzyDB('dados_db/lazzy', SFTP_DATA, storage=DumpStorSSH, cache_size=100) as db_remote:
+    with JsonLazzyDB('/mnt/remote', 'dados_db/lazzy', SFTP_DATA, storage=DumpStorSSH, cache_size=100) as db_remote:
 
         tbl : Table = db_remote.Tabela
 
@@ -50,6 +50,5 @@ if __name__ == "__main__":
                     'nome' : 'John',
                     'idade': 55,
                     'last': datetime.now().isoformat()})
-
 
         logger.info('Result doc_id: %d val:%s', id, str(rec))

@@ -1,6 +1,6 @@
 '''
 Created on 20250208
-Update on 20250302
+Update on 20250305
 @author: Eduardo Pagotto
 '''
 
@@ -20,6 +20,12 @@ __all__ = ('DumpStor', 'DumpStorSSH')
 
 class DumpStor(Storage):
     def __init__(self, filename : str, cache_size : int):
+        """Create/acess a json data file
+
+        Args:
+            filename (str): path file name of json file
+            cache_size (int): number of insert or update until automatic flush do file
+        """
 
         self.filename = filename
         self.cache_size = cache_size
@@ -34,6 +40,11 @@ class DumpStor(Storage):
         self.exist_file = True
 
     def read(self)-> Optional[Dict[str, Dict[str, Any]]]:
+        """Read entry used to get data in file
+
+        Returns:
+            Optional[Dict[str, Dict[str, Any]]]: dataof json in dictionary
+        """
 
         if self.cache:
             return self.cache
@@ -62,6 +73,11 @@ class DumpStor(Storage):
         return None
 
     def write(self, data: Dict[str, Dict[str, Any]]):
+        """Write dictionary to file json
+
+        Args:
+            data (Dict[str, Dict[str, Any]]): data to save
+        """
 
         self.cache = data
         self._cache_modified_count += 1
@@ -71,12 +87,14 @@ class DumpStor(Storage):
             self.flush()
 
     def flush(self):
+        """execute a write pendents
+        """
 
         if self._cache_modified_count == 0:
             return
 
         self._cache_burst += 1
-        logger.warning('cache burst: %d', self._cache_burst)
+        logger.warning('flush in %d transactions.', self._cache_burst)
 
         self._cache_modified_count = 0
 
@@ -96,6 +114,9 @@ class DumpStor(Storage):
             outfile.write(json_object)
 
     def close(self):
+        """automatic flush in close
+        """
+
         self.flush()
         self.tot_read = 0
         self.tot_write = 0
@@ -106,8 +127,17 @@ class DumpStor(Storage):
 
 
 class DumpStorSSH(Storage):
-    def __init__(self, conn : str, sftp_cfg : dict, cache_size : int):
+    def __init__(self, mount_point : str, conn : str, sftp_cfg : dict, cache_size : int):
+        """_sumCreate a temporary conection to access remote json data filemary_
 
+        Args:
+            mount_point (str): loacal mount point used to create/use directory structure of json file
+            conn (str): directory/file used to json file
+            sftp_cfg (dict): dictionary with user/host/pass where json file stay
+            cache_size (int): number of insert or update until automatic flush do file.
+        """
+
+        self.mount_point = mount_point
         self.conn = conn
         self.filename = ''
         self.sftp_cfg = sftp_cfg
@@ -123,6 +153,11 @@ class DumpStorSSH(Storage):
         self.exist_file = True
 
     def read(self)-> Optional[Dict[str, Dict[str, Any]]]:
+        """Read entry used to get data in file
+
+        Returns:
+            Optional[Dict[str, Dict[str, Any]]]: dataof json in dictionary
+        """
 
         if self.cache:
             return self.cache
@@ -131,7 +166,7 @@ class DumpStorSSH(Storage):
 
             try:
 
-                with SSHFS(self.sftp_cfg, False) as remote:
+                with SSHFS(self.sftp_cfg, False, self.mount_point) as remote:
 
                     p, f = os.path.split(self.conn)
                     path_remoto : str = remote.get_path(p)
@@ -159,6 +194,11 @@ class DumpStorSSH(Storage):
 
 
     def write(self, data: Dict[str, Dict[str, Any]]):
+        """Write dictionary to file json
+
+        Args:
+            data (Dict[str, Dict[str, Any]]): data to save
+        """
 
         self.cache = data
         self._cache_modified_count += 1
@@ -168,14 +208,16 @@ class DumpStorSSH(Storage):
             self.flush()
 
     def flush(self):
+        """execute a write pendents
+        """
 
         if self._cache_modified_count == 0:
             return
 
         self._cache_burst += 1
-        logger.warning('cache burst: %d', self._cache_burst)
+        logger.warning('flush in %d transactions.', self._cache_burst)
 
-        with SSHFS(self.sftp_cfg, False) as remote:
+        with SSHFS(self.sftp_cfg, False, self.mount_point) as remote:
 
             self._cache_modified_count = 0
 
@@ -195,6 +237,9 @@ class DumpStorSSH(Storage):
                 outfile.write(json_object)
 
     def close(self):
+        """automatic flush in close
+        """
+
         self.flush()
         self.tot_read = 0
         self.tot_write = 0
