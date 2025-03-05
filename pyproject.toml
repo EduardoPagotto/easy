@@ -1,0 +1,19 @@
+[project]
+authors = [
+  {name = "Eduardo Pagotto", email = "edupagotto@gmail.com"},
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Database",
+  "Operating System :: POSIX",
+  "License :: OSI Approved :: MIT License",
+]
+description = "A small utils to tinyDB access SFTP as repository data in json file"
+name = "easy_tinydb"
+readme = "README.md"
+requires-python = ">=3.13"
+version = "1.0.0"
+
+[project.urls]
+Homepage = "https://github.com/EduardoPagotto/easy"
+Issues = "https://github.com/EduardoPagotto/easy/issues"

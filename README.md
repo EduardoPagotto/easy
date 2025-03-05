@@ -1,11 +1,11 @@
 # Easy
 
-Facilitador de uso do TinyDB em SSHFS
+TinyDB in SSHFS
 
-Dependencias no Fedora 41
+Dependencies of Fedora 41
 ```bash
 # instala CLI
-sudo dnf install  sshfs
+sudo dnf install sshfs
 
 # set env
 python3 -m venv .venv
@@ -15,25 +15,21 @@ source .venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-Para teste
+To test
 ```bash
-# Criar na maquina com usuario remote01 com password 'ZZZZZ'
+# Create user in host remote01 and password 'ZZZZZ'
 sudo adduser remote01
 sudo passwd remote01 'ZZZZZ'
 
-# Entrar 1x para captura do ip
-ssh remote01@127.0.0.1
-
-# sai do usuario remoto
 exit
 
-# Configurar /etc/fuse.conf descomentado user_allow_other e salvar
+# Config /etc/fuse.conf uncoment user_allow_other
 sudo vim /etc/fuse.conf
 
-# montagem na mao da unidade
+# create a mount point
 sudo mkdir /mnt/shared
 
-# Monta unidade
+# Manualy mount
 sshfs remote01@127.0.0.1:/home/remote01/ /mnt/shared -o password_stdin -o allow_other -o ro <<< 'ZZZZZ'
 
 ```
