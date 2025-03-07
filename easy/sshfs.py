@@ -1,9 +1,10 @@
 '''
 Created on 20241209
-Update on 20250305
+Update on 20250306
 @author: Eduardo Pagotto
 '''
 
+import json
 import logging
 import os
 import time
@@ -27,7 +28,7 @@ def umount_point(mount_point :str) -> bool:
     try:
         if os.path.ismount(mount_point):
             os.sync()
-            logger.info('execute umount %s', mount_point)
+            #logger.info('execute umount %s', mount_point)
             time.sleep(0.5)
         else:
             return True
@@ -95,11 +96,11 @@ class SSHFS(object):
 
         new_path = os.path.join(self.get_local(), path)
         if os.path.isdir(new_path):
-            logger.info('path remoto adquirido: %s', new_path)
+            #logger.info('path remoto adquirido: %s', new_path)
             return new_path
 
         Path(new_path).mkdir(parents=True, exist_ok=True)
-        logger.warning('path remoto criado: %s', new_path)
+        logger.warning('remote path create: %s', new_path)
         return new_path
 
 
@@ -109,7 +110,7 @@ class SSHFS(object):
         try:
             str_ro = '-o ro' if self.ro else '-o rw'
 
-            logger.info("host %s -> %s",str_ro, self.conn['host'])
+            #logger.info("host %s -> %s",str_ro, self.conn['host'])
 
             cmd = f"echo \'{self.conn['passwd']}\' | sshfs {self.conn['user']}@{self.conn['host']}:{self.conn['remote']} {self.local} -o password_stdin -o allow_other {str_ro}"
 
@@ -131,3 +132,24 @@ class SSHFS(object):
         """Leaving a context."""
 
         umount_point(self.local)
+
+    def write_json(self, recordset : dict, file_name : str) -> bool:
+
+        try:
+            json_object = json.dumps(recordset, ensure_ascii=False)
+
+            if os.path.isfile(file_name):
+                os.unlink(file_name)
+
+            with open(file_name, "w") as outfile:
+                outfile.write(json_object)
+                return True
+
+        except (Exception) as exp:
+            logger.error("Fail write file %s -> %s", file_name, str(exp.args))
+
+        return False
+
+    def list_files(self, pathfile : str) -> list[str]:
+        pathlocal : str = self.get_path(pathfile)
+        return sorted(os.listdir(pathlocal))

@@ -35,7 +35,6 @@ class DumpStor(Storage):
 
         self.cache = None
         self._cache_modified_count = 0
-        self._cache_burst = 0
 
         self.exist_file = True
 
@@ -93,10 +92,7 @@ class DumpStor(Storage):
         if self._cache_modified_count == 0:
             return
 
-        self._cache_burst += 1
-        logger.warning('flush in %d transactions.', self._cache_burst)
-
-        self._cache_modified_count = 0
+        logger.warning('flush %s with %d transactions.', self.filename, self._cache_modified_count)
 
         self.tot_write += 1
         self.tot_read += self.last_read
@@ -112,6 +108,7 @@ class DumpStor(Storage):
 
         with open(self.filename, "w") as outfile:
             outfile.write(json_object)
+            self._cache_modified_count = 0
 
     def close(self):
         """automatic flush in close
@@ -122,7 +119,6 @@ class DumpStor(Storage):
         self.tot_write = 0
         self.last_read = 0
         self.cache = None
-        self._cache_burst = 0
         self.exist_file = False
 
 
@@ -148,7 +144,6 @@ class DumpStorSSH(Storage):
 
         self.cache = None
         self._cache_modified_count = 0
-        self._cache_burst = 0
 
         self.exist_file = True
 
@@ -214,12 +209,9 @@ class DumpStorSSH(Storage):
         if self._cache_modified_count == 0:
             return
 
-        self._cache_burst += 1
-        logger.warning('flush in %d transactions.', self._cache_burst)
+        logger.warning('flush %s with %d transactions.', self.filename, self._cache_modified_count)
 
         with SSHFS(self.sftp_cfg, False, self.mount_point) as remote:
-
-            self._cache_modified_count = 0
 
             self.tot_write += 1
             self.tot_read += self.last_read
@@ -235,6 +227,7 @@ class DumpStorSSH(Storage):
 
             with open(self.filename, "w") as outfile:
                 outfile.write(json_object)
+                self._cache_modified_count = 0
 
     def close(self):
         """automatic flush in close
@@ -245,5 +238,4 @@ class DumpStorSSH(Storage):
         self.tot_write = 0
         self.last_read = 0
         self.cache = None
-        self._cache_burst = 0
         self.exist_file = False
