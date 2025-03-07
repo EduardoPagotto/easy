@@ -15,11 +15,14 @@ from easy.sshparamiko import SSHParamiko
 
 logger = logging.getLogger(__name__)
 
+__all__ = ('DumpStorParamiko')
+
 class DumpStorParamiko(Storage):
-    def __init__(self, conn : str, sftp_cfg : dict, cache_size : int):
+    def __init__(self,mount_point :str, conn : str, sftp_cfg : dict, cache_size : int):
         """Storage using paramiko
 
         Args:
+            mount_point (str): not used
             conn (str): directory/filename
             sftp_cfg (dict): dictionary with user/host/pass where json file stay
             cache_size (int): size of cached inserts/updates

@@ -10,6 +10,8 @@ import paramiko
 
 logger = logging.getLogger(__name__)
 
+__all__ = ('SSHParamiko')
+
 class SSHParamiko(object):
     def __init__(self, sftp_cfg : dict):
         """Open sftp session
