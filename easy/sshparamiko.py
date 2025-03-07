@@ -119,8 +119,8 @@ class SSHParamiko(object):
 
         self.get_path(pathfile)
 
-        for i in self.ftp.listdir():
-            lstatout = str(self.ftp.lstat(i)).split()[0]
+        for i in self.sftp.listdir():
+            lstatout = str(self.sftp.lstat(i)).split()[0]
             if 'd' not in lstatout:
                 files.append(i)
 
