@@ -90,6 +90,14 @@
 				"program": "${workspaceFolder}/tests/lazzy.py",
 				"console": "integratedTerminal",
 				"args": []
+			},
+			{
+				"name": "PARAMIKO",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${workspaceFolder}/tests/param.py",
+				"console": "integratedTerminal",
+				"args": []
 			}
 		],
 		"compounds": []

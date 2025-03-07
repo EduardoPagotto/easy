@@ -1,3 +1,4 @@
 pip==25.0.1
 tinydb==4.8.2
 tinydb-serialization==2.2.0
+paramiko==3.5.1
