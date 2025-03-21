@@ -1,6 +1,6 @@
 '''
 Created on 20241209
-Update on 20250306
+Update on 20250319
 @author: Eduardo Pagotto
 '''
 
@@ -50,18 +50,20 @@ def umount_point(mount_point :str) -> bool:
     return False
 
 class SSHFS(object):
-    def __init__(self, conn : dict, ro: bool, local : Optional[str] = None):
+    def __init__(self, conn : dict, ro: bool, local : Optional[str] = None, remote : Optional[str] = None):
         """Mount remote SSHFS
 
         Args:
             conn (dict): data with user/host/pass of sftp server
             ro (bool): True to mount remote sshfs as Read Only
-            local (Optional[str], optional): Overrite mount point in conn dictionary. Defaults to None.
+            local (Optional[str], optional): Overrite local point in conn dictionary. Defaults to None.
+            remote (Optional[str], optional): Overrite remote mount point in conn dictionary. Defaults to None.
         """
 
         self.conn = conn
         self.ro = ro
         self.local = self.conn['local'] if not local else local
+        self.remote = self.conn['remote'] if not remote else remote
 
         try:
             # if path nof mount point not exist, create
@@ -110,9 +112,7 @@ class SSHFS(object):
         try:
             str_ro = '-o ro' if self.ro else '-o rw'
 
-            #logger.info("host %s -> %s",str_ro, self.conn['host'])
-
-            cmd = f"echo \'{self.conn['passwd']}\' | sshfs {self.conn['user']}@{self.conn['host']}:{self.conn['remote']} {self.local} -o password_stdin -o allow_other {str_ro}"
+            cmd = f"echo \'{self.conn['passwd']}\' | sshfs {self.conn['user']}@{self.conn['host']}:{self.remote} {self.local} -o password_stdin -o allow_other {str_ro}"
 
             result = subprocess.run(cmd,
                                 text=True,

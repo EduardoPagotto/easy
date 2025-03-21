@@ -98,6 +98,14 @@
 				"program": "${workspaceFolder}/tests/param.py",
 				"console": "integratedTerminal",
 				"args": []
+			},
+			{
+				"name": "LISTA",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${workspaceFolder}/tests/lista.py",
+				"console": "integratedTerminal",
+				"args": []
 			}
 		],
 		"compounds": []
