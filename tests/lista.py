@@ -21,21 +21,21 @@ if __name__ == "__main__":
 
     root = build_linkedList(3)
 
-    node0 = root.get_next()
-    logger.info(str(node0.get_point()))
+    node0 = root.reserv()
+    logger.info(str(node0.get_data()))
 
-    node1 = node0.get_next()
-    logger.info(str(node1.get_point()))
+    node1 = root.reserv()
+    logger.info(str(node1.get_data()))
 
-    node2 = node1.get_next()
-    logger.info(str(node2.get_point()))
+    node2 = root.reserv()
+    logger.info(str(node2.get_data()))
 
     node2.reselase()
 
-    node3 = node2.get_next()
-    logger.info(str(node3.get_point()))
+    node3 = root.reserv()
+    logger.info(str(node3.get_data()))
 
     node0.reselase()
 
-    node4 = node3.get_next()
-    logger.info(str(node4.get_point()))
+    node4 = root.reserv()
+    logger.info(str(node4.get_data()))
