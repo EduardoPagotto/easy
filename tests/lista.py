@@ -10,7 +10,7 @@ import logging
 import sys
 sys.path.append('.')
 
-from easy.mount_node import PathLocalMng
+from easy.path_mng import PathLocalMng
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -46,7 +46,3 @@ if __name__ == "__main__":
     logger.info(str(path_mng))
 
     path_mng.release_all()
-
-    logger.info(str(path_mng))
-
-    logger.info(str(path_mng))
