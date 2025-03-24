@@ -10,7 +10,7 @@ import logging
 import sys
 sys.path.append('.')
 
-from easy.mount_node import build_linkedList
+from easy.mount_node import PathLocalMng
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -19,23 +19,34 @@ logger = logging.getLogger('lista')
 
 if __name__ == "__main__":
 
-    root = build_linkedList(3)
+    path_mng = PathLocalMng(4)
 
-    node0 = root.reserv()
+    node0 = path_mng.reserv()
     logger.info(str(node0.get_data()))
 
-    node1 = root.reserv()
+    node1 = path_mng.reserv()
     logger.info(str(node1.get_data()))
 
-    node2 = root.reserv()
+    node2 = path_mng.reserv()
     logger.info(str(node2.get_data()))
+
+    node3 = path_mng.reserv()
+    logger.info(str(node3.get_data()))
 
     node2.reselase()
 
-    node3 = root.reserv()
-    logger.info(str(node3.get_data()))
+    node4 = path_mng.reserv()
+    logger.info(str(node4.get_data()))
 
     node0.reselase()
 
-    node4 = root.reserv()
-    logger.info(str(node4.get_data()))
+    node5 = path_mng.reserv()
+    logger.info(str(node5.get_data()))
+
+    logger.info(str(path_mng))
+
+    path_mng.release_all()
+
+    logger.info(str(path_mng))
+
+    logger.info(str(path_mng))

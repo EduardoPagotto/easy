@@ -4,25 +4,12 @@ Update on 20250320
 @author: Eduardo Pagotto
 '''
 
-# ref: https://stackoverflow.com/questions/4360050/circularly-linked-list-in-python
-
 import logging
 from typing import Optional, Self
 
 logger = logging.getLogger(__name__)
 
-
-# class MountData():
-#     __slots__ = ('mount_point','reserved')
-#     def __init__(self, mount : str):
-#         self.mount_point = mount
-#         self.reserved : bool = False
-
-#     def __str__(self):
-#         return f'{self.mount_point}:{self.reserved}'
-
-
-class MountNode:
+class PathNode:
 
     __slots__ = ('mount_point', 'reserved', 'next')
 
@@ -64,18 +51,45 @@ class MountNode:
     def get_data(self) -> str:
         return self.mount_point
 
-def build_linkedList(tot : int) -> MountNode:
+class PathLocalMng:
+    def __init__(self, tot : int):
 
-    root : MountNode = None
-    for idx in range(0, tot):
-        if not root:
-            root = MountNode(f'/mnt/remote{idx}', None)
-            root.next = root
-        else:
-            cursor = root
-            while cursor.next != root:
-                cursor = cursor.next
+        if tot < 3:
+            tot = 3
 
-            cursor.next = MountNode(f'/mnt/remote{idx}', root)
+        root : PathNode = None
+        for idx in range(0, tot):
+            if not root:
+                root = PathNode(f'/mnt/remote{idx}', None)
+                root.next = root
+            else:
+                cursor = root
+                while cursor.next != root:
+                    cursor = cursor.next
 
-    return root
+                cursor.next = PathNode(f'/mnt/remote{idx}', root)
+
+        self.root : PathNode = root
+
+    def __str__(self):
+        return str(self.root)
+
+    def reserv(self) -> PathNode:
+        return self.root.reserv()
+
+    def release_all(self):
+
+        lst_tmp = []
+        prox = self.root
+        while  True:
+            lst_tmp.append(prox)
+            prox = prox.next
+            if prox == self.root:
+                break
+
+        for item in lst_tmp:
+            item.next = None
+            item = None
+
+        del lst_tmp
+        del self.root
