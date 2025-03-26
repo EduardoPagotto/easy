@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20250129
-Update on 20250305
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
@@ -16,15 +16,10 @@ import sys
 sys.path.append('.')
 
 from easy.store_para import DumpStorParamiko
-from easy.db import JsonLazzyDB
+from easy.db import JsonDBSSH
 from easy.sshparamiko import SSHParamiko
 
-# Dados de conexao do host
-SFTP_DATA = {"host": "192.168.0.102",
-             "user": "uctest",
-             "passwd": "Zaq12wsX",
-             "remote": ".",
-             "local": "/mnt/remote_db"}
+SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:?dir=dados_db&file=paramiko.json'
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -38,7 +33,7 @@ def simples_write_read():
     # Teste escrita json no SFTP
     with SSHParamiko(SFTP_DATA) as remote:
 
-        aa = remote.get_path('teste_z1')
+        #aa = remote.get_path('teste_z1')
         teste = {'nome': 'locutus', 'idade':5000}
         remote.write_json(teste, 't1.json')
 
@@ -46,7 +41,7 @@ def simples_write_read():
 
     # Teste leitura no SFTP
     with SSHParamiko(SFTP_DATA) as remote:
-        aa = remote.get_path('teste_z1')
+        #aa = remote.get_path('teste_z1')
         with remote.sftp.open('t1.json', 'r') as handle:
             handle.prefetch()
             cache =  json.load(handle)
@@ -56,7 +51,7 @@ def simples_write_read():
 
 def teste_db():
 
-    with JsonLazzyDB('', 'dados_db/param', SFTP_DATA, storage=DumpStorParamiko, cache_size=100) as db_remote:
+    with JsonDBSSH(sshfs_url=SFTP_DATA, path_mng=None, storage=DumpStorParamiko, cache_size=100) as db_remote:
 
         tbl : Table = db_remote.Tabela
 

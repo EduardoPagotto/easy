@@ -1,6 +1,6 @@
 '''
 Created on 20250320
-Update on 20250320
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
@@ -8,6 +8,8 @@ import logging
 from typing import Optional, Self
 
 logger = logging.getLogger(__name__)
+
+__all__ = ('PathNode','PathLocalMng')
 
 class PathNode:
 
@@ -48,7 +50,7 @@ class PathNode:
     def reselase(self) -> None:
         self.reserved = False
 
-    def get_data(self) -> str:
+    def get_path(self) -> str:
         return self.mount_point
 
 class PathLocalMng:

@@ -1,15 +1,18 @@
 '''
 Created on 20250208
-Update on 20250305
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
 import os
+from typing import Optional
 from tinydb.database import TinyDB
 from tinydb.storages import Storage
 from tinydb.table import Table
 
-__all__ = ('JsonDB','JsonLazzyDB')
+from easy.path_mng import PathLocalMng
+
+__all__ = ('JsonDB','JsonDBSSH')
 
 class JsonDB(object):
     def __init__(self, foldername : str, database: str, storage : Storage, cache_size : int = 50):
@@ -61,29 +64,22 @@ class JsonDB(object):
         """
         return list(self.tinydb.tables())
 
-class JsonLazzyDB(object):
-    def __init__(self, mount_point : str,  conn : str, sftp_cfg : dict, storage : Storage, cache_size : int = 1000):
+class JsonDBSSH(object):
+    def __init__(self, sshfs_url : str,  path_mng : Optional[PathLocalMng], storage : Storage, cache_size : int = 1000):
         """Create a temporary conection to access remote json data file
 
         Args:
-            mount_point (str): loacal mount point used to create/use directory structure of json file
-            conn (str): directory/file used to json file
-            sftp_cfg (dict): dictionary with user/host/pass where json file stay
-            storage (Storage): Class used to deal with ssh/paraminko
-            cache_size (int, optional): number of insert or update until automatic flush do file. Defaults to 1000.
-            <p>
-            <b>Exmaple:</b>
-            JsonLazzyDB('/mnt/remote/', 'databases/data' val['sftp], DumpStorSSH, 5000)<p>
-            <i>json file stay in: '/mnt/remote/databases/data.json'</i>
+            sshfs_url (str): sftp url
+            path_mng (Optional[PathLocalMng]): path manager to get a valid free local path to mount
+            cache_size
+
         """
 
         self.tinydb = TinyDB(
-            conn = conn,
-            sftp_cfg = sftp_cfg,
+            sshfs_url = sshfs_url,
+            path_mng = path_mng,
             storage = storage,
-            mount_point = mount_point,
-            cache_size = cache_size
-        )
+            cache_size = cache_size)
 
     def __enter__(self):
         """Use the database as a context manager."""

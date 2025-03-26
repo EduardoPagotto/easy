@@ -1,27 +1,24 @@
 #!/usr/bin/env python3
 '''
 Created on 20250129
-Update on 20250305
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
 import logging
 from datetime import datetime
 
-from tinydb import where
-from tinydb.table import Table
-
 import sys
 sys.path.append('.')
 
-from easy import JsonLazzyDB, DumpStorSSH
+from tinydb import where
+from tinydb.table import Table
+
+from easy.path_mng import PathLocalMng
+from easy import JsonDBSSH, DumpStorSSH
 
 # Dados de conexao do host
-SFTP_DATA = {"host": "192.168.0.102",
-             "user": "uctest",
-             "passwd": "Zaq12wsX",
-             "remote": ".",
-             "local": "/mnt/remote_db"}
+SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:?dir=dados_db&file=lazze.json'
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -30,7 +27,9 @@ logger = logging.getLogger('lazzy')
 
 if __name__ == "__main__":
 
-    with JsonLazzyDB('/mnt/remote', 'dados_db/lazzy', SFTP_DATA, storage=DumpStorSSH, cache_size=100) as db_remote:
+    path_mng = PathLocalMng(4)
+
+    with JsonDBSSH(SFTP_DATA,  path_mng, storage=DumpStorSSH, cache_size=100) as db_remote:
 
         tbl : Table = db_remote.Tabela
 

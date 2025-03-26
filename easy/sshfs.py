@@ -1,6 +1,6 @@
 '''
 Created on 20241209
-Update on 20250319
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
@@ -10,13 +10,15 @@ import os
 import time
 from pathlib import Path
 import subprocess
-from typing import Optional
+from urllib.parse import urlparse, parse_qs, urlsplit, parse_qsl
+
+from easy.path_mng import PathLocalMng
 
 logger = logging.getLogger(__name__)
 
 __all__ = ('SSHFS', 'umount_point')
 
-def umount_point(mount_point :str) -> bool:
+def umount_point(mount_point :str, force : bool = False) -> bool:
     """umount SSHDFS
 
     Args:
@@ -26,12 +28,13 @@ def umount_point(mount_point :str) -> bool:
         bool: True to sucess
     """
     try:
-        if os.path.ismount(mount_point):
-            os.sync()
-            #logger.info('execute umount %s', mount_point)
-            time.sleep(0.5)
-        else:
-            return True
+        if not force:
+            if os.path.ismount(mount_point):
+                os.sync()
+                #logger.info('execute umount %s', mount_point)
+                time.sleep(0.5)
+            else:
+                return True
 
         result = subprocess.run(f"umount {mount_point}",
                                 text=True,
@@ -50,33 +53,42 @@ def umount_point(mount_point :str) -> bool:
     return False
 
 class SSHFS(object):
-    def __init__(self, conn : dict, ro: bool, local : Optional[str] = None, remote : Optional[str] = None):
+    def __init__(self, sshfs_url : str, ro: bool, path_mng : PathLocalMng):
         """Mount remote SSHFS
-
         Args:
-            conn (dict): data with user/host/pass of sftp server
+            sshfs_url (str): sftp url
             ro (bool): True to mount remote sshfs as Read Only
-            local (Optional[str], optional): Overrite local point in conn dictionary. Defaults to None.
-            remote (Optional[str], optional): Overrite remote mount point in conn dictionary. Defaults to None.
+            path_mng PathLocalMng: path manager to get a valid free local path to mount
         """
 
-        self.conn = conn
-        self.ro = ro
-        self.local = self.conn['local'] if not local else local
-        self.remote = self.conn['remote'] if not remote else remote
+        p = urlparse(sshfs_url)
+        if p.scheme != 'sftp':
+            raise Exception('URI wrong schemma')
 
+        self.params = dict(parse_qsl(urlsplit(sshfs_url).query))
+
+        self.user = p.username
+        self.password = p.password
+        self.host = p.hostname
+        self.remote, f = os.path.split(p.path)
+        self.path_node = path_mng.reserv()
+        self.filename = os.path.join(self.path_node.get_path(), f) if f else ''
+
+        self.ro = ro
+
+        local = self.get_local()
         try:
             # if path nof mount point not exist, create
-            if Path(self.local).is_dir():
-                umount_point(self.local)
+            if Path(local).is_dir():
+                umount_point(local)
             else:
                 # check if mount point already monted if is, dismount(old error connection status)
-                logger.info('novo diretorio de montagem: %s', self.local)
-                Path(self.local).mkdir(parents=True, exist_ok=True)
-        except:
+                logger.info('novo diretorio de montagem: %s', local)
+                Path(local).mkdir(parents=True, exist_ok=True)
+        except Exception as exp:
             # any thing wrong Except
-            umount_point(self.local)
-            raise Exception("Falha SSHFS em %s", self.local)
+            umount_point(local, True)
+            raise Exception("Falha %s, SSHFS em %s", str(exp.args), self.local)
 
     def get_local(self) -> str:
         """Get mounted point
@@ -84,7 +96,10 @@ class SSHFS(object):
         Returns:
             str: path full
         """
-        return self.local
+        return self.path_node.get_path()
+
+    def get_path_filename(self) -> str:
+        return self.filename
 
     def get_path(self, path : str) -> str:
         """returns the mounted directory plus the parameter, and creates the same if there is no
@@ -112,7 +127,7 @@ class SSHFS(object):
         try:
             str_ro = '-o ro' if self.ro else '-o rw'
 
-            cmd = f"echo \'{self.conn['passwd']}\' | sshfs {self.conn['user']}@{self.conn['host']}:{self.remote} {self.local} -o password_stdin -o allow_other {str_ro}"
+            cmd = f"echo \'{self.password}\' | sshfs {self.user}@{self.host}:{self.remote} {self.get_local()} -o password_stdin -o allow_other {str_ro}"
 
             result = subprocess.run(cmd,
                                 text=True,
@@ -126,12 +141,29 @@ class SSHFS(object):
         except Exception as exp:
             raise Exception(str(exp.args))
 
+        loc = self.get_local()
+        if 'dir' in self.params:
+            new_path = self.params['dir']
+            if len(new_path) > 0:
+                loc = self.get_path(new_path)
+
+        if 'file' in self.params:
+            filename = self.params['file']
+            if len(filename) > 0:
+                self.filename = os.path.join(loc, filename)
+
         return self
 
     def __exit__(self, *err):
         """Leaving a context."""
 
-        umount_point(self.local)
+        umount_point(self.get_local())
+        self.path_node.reselase()
+
+
+    def write_json_url(self, rec : dict) -> bool:
+        return self.write_json(rec, self.filename)
+
 
     def write_json(self, recordset : dict, file_name : str) -> bool:
 

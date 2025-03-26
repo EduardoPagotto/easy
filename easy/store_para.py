@@ -1,6 +1,6 @@
 '''
 Created on 20250307
-Update on 20250307
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 from tinydb import Storage
 
+from easy.path_mng import PathLocalMng
 from easy.sshparamiko import SSHParamiko
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 __all__ = ('DumpStorParamiko')
 
 class DumpStorParamiko(Storage):
-    def __init__(self,mount_point :str, conn : str, sftp_cfg : dict, cache_size : int):
+    def __init__(self, sshfs_url : str, path_mng : Optional[PathLocalMng], cache_size : int):
         """Storage using paramiko
 
         Args:
@@ -28,10 +29,9 @@ class DumpStorParamiko(Storage):
             cache_size (int): size of cached inserts/updates
         """
 
-        self.conn = conn
+        self.sshfs_url = sshfs_url
         self.filename = ''
         self.path_remoto = ''
-        self.sftp_cfg = sftp_cfg
         self.cache_size = cache_size
         self.last_read = 0
         self.tot_read = 0
@@ -55,15 +55,13 @@ class DumpStorParamiko(Storage):
         if self.exist_file:
 
             try:
-                with SSHParamiko(self.sftp_cfg) as remote:
+                path_filename = ''
+                with SSHParamiko(self.sshfs_url) as remote:
 
-                    p, f = os.path.split(self.conn)
-                    self.path_remoto = remote.get_path(p)
-                    self.filename =  f + u".json" #os.path.join(path_remoto, f + u".json")
+                    path_filename = remote.get_path_filename()
+                    logger.info("json opening %s",path_filename)
 
-                    logger.info("json opening %s", os.path.join(self.path_remoto, self.filename))
-
-                    with remote.sftp.open(self.filename, 'r') as handle:
+                    with remote.sftp.open(path_filename, 'r') as handle:
 
                         handle.prefetch()
 
@@ -108,15 +106,18 @@ class DumpStorParamiko(Storage):
 
         logger.warning('flush %s with %d transactions.', self.filename, self._cache_modified_count)
 
-        with SSHParamiko(self.sftp_cfg) as sftp:
+        path_filename = ''
+        with SSHParamiko(self.sshfs_url) as sftp:
+
+            path_filename = sftp.get_path_filename()
 
             self.tot_write += 1
             self.tot_read += self.last_read
             self.cache['_SystemDB'] = {'reads': self.tot_read, 'writes':self.tot_write,'last_save':datetime.now().isoformat()}
 
-            sftp.get_path(self.path_remoto)
+            #sftp.get_path(self.path_remoto)
 
-            if sftp.write_json(self.cache, self.filename):
+            if sftp.write_json(self.cache, path_filename):
                 self.exist_file = True
                 self._cache_modified_count = 0
 

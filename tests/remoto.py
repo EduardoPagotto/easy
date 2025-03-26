@@ -1,39 +1,67 @@
 #!/usr/bin/env python3
 '''
 Created on 20250129
-Update on 20250302
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
 import logging
 from datetime import datetime
 
+import os
+import sys
+
+sys.path.append('.')
+
+from easy.db import JsonDB
+from easy.path_mng import PathLocalMng
+from easy.sshfs import SSHFS
+from easy.store import DumpStor
+
 from tinydb import where
 from tinydb.table import Table
 
-import sys
-sys.path.append('.')
+# params = {'dir': 'dados_db','file':'remoto.json'}
+# encoded_params = urllib.parse.urlencode(params)
+#final_url = f'{SFTP_DATA}?{encoded_params}'
 
-from easy import SSHFS, JsonDB, DumpStor
+#SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102'
+#SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:/data/arquivo.txt'
+#SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:/home/uctest/'
 
-# Dados de conexao do host
-SFTP_DATA = {"host": "192.168.0.102",
-             "user": "uctest",
-             "passwd": "Zaq12wsX",
-             "remote": ".",
-             "local": "/mnt/remote_db"}
+#SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:/home/uctest/?dir=dados_db&file=remoto.json'
+
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 logger = logging.getLogger('remoto')
 
+def get_env():
+    try:
+        with open('.env', 'r') as fh:
+            vars_dict = dict(
+                tuple(line.replace('\n', '').split('='))
+                for line in fh.readlines() if not line.startswith('#')
+            )
+
+        os.environ.update(vars_dict)
+    except Exception as exp:
+        logger.critical("Erro Carga de parametros")
+
 if __name__ == "__main__":
 
+    get_env()
+
+    SFTP_DATA = os.environ.get('SFTP')
+
+    path_mng = PathLocalMng(4)
+
     # Monta SFTP para acesso ao DB
-    with SSHFS(SFTP_DATA, False) as mnt_remote:
+    with SSHFS(SFTP_DATA, False, path_mng) as mnt_remote:
 
         path_db = mnt_remote.get_path('dados_db')
+        #path_db = mnt_remote.get_local()
 
         with JsonDB(path_db, 'remoto', storage=DumpStor) as db_remote:
 

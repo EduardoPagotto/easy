@@ -1,6 +1,6 @@
 '''
 Created on 20250208
-Update on 20250305
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 from tinydb.storages import Storage
 
+from easy.path_mng import PathLocalMng
 from easy.sshfs import SSHFS
 
 logger = logging.getLogger(__name__)
@@ -123,7 +124,7 @@ class DumpStor(Storage):
 
 
 class DumpStorSSH(Storage):
-    def __init__(self, mount_point : str, conn : str, sftp_cfg : dict, cache_size : int):
+    def __init__(self,  sshfs_url : str,  path_mng : PathLocalMng, cache_size : int):
         """_sumCreate a temporary conection to access remote json data filemary_
 
         Args:
@@ -133,10 +134,9 @@ class DumpStorSSH(Storage):
             cache_size (int): number of insert or update until automatic flush do file.
         """
 
-        self.mount_point = mount_point
-        self.conn = conn
-        self.filename = ''
-        self.sftp_cfg = sftp_cfg
+        self.sshfs_url = sshfs_url
+        self.path_mng = path_mng
+
         self.cache_size = cache_size
         self.last_read = 0
         self.tot_read = 0
@@ -160,15 +160,12 @@ class DumpStorSSH(Storage):
         if self.exist_file:
 
             try:
+                path_filename = ''
+                with SSHFS(self.sshfs_url, False, self.path_mng) as remote:
 
-                with SSHFS(self.sftp_cfg, False, self.mount_point) as remote:
-
-                    p, f = os.path.split(self.conn)
-                    path_remoto : str = remote.get_path(p)
-                    self.filename = os.path.join(path_remoto, f + u".json")
-
-                    logger.info("json opening %s", self.filename)
-                    with open(self.filename, 'r') as handle:
+                    path_filename = remote.get_path_filename()
+                    logger.info("json opening %s", path_filename)
+                    with open(path_filename, 'r') as handle:
                         self.cache =  json.load(handle)
 
                         if '_SystemDB' in self.cache:
@@ -180,9 +177,9 @@ class DumpStorSSH(Storage):
                         return self.cache
 
             except json.JSONDecodeError:
-                logger.error('json %s malformed', self.filename)
+                logger.error('json %s malformed', path_filename)
             except FileNotFoundError:
-                logger.warning('json %s not exist', self.filename)
+                logger.warning('json %s not exist', path_filename)
 
         self.exist_file = False
         return None
@@ -209,9 +206,12 @@ class DumpStorSSH(Storage):
         if self._cache_modified_count == 0:
             return
 
-        logger.warning('flush %s with %d transactions.', self.filename, self._cache_modified_count)
+        path_filename = ''
+        with SSHFS(self.sshfs_url, False, self.path_mng) as remote:
 
-        with SSHFS(self.sftp_cfg, False, self.mount_point) as remote:
+            path_filename = remote.get_path_filename()
+
+            logger.warning('flush %s with %d transactions.', path_filename, self._cache_modified_count)
 
             self.tot_write += 1
             self.tot_read += self.last_read
@@ -219,13 +219,13 @@ class DumpStorSSH(Storage):
 
             json_object = json.dumps(self.cache, ensure_ascii=False)
 
-            if os.path.isfile(self.filename):
-                os.unlink(self.filename)
+            if os.path.isfile(path_filename):
+                os.unlink(path_filename)
             else:
-                logger.warning('json %s will be create',self.filename)
+                logger.warning('json %s will be create',path_filename)
                 self.exist_file = True
 
-            with open(self.filename, "w") as outfile:
+            with open(path_filename, "w") as outfile:
                 outfile.write(json_object)
                 self._cache_modified_count = 0
 

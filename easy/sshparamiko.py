@@ -1,11 +1,13 @@
 '''
 Created on 20250307
-Update on 20250307
+Update on 20250325
 @author: Eduardo Pagotto
 '''
 
 import json
 import logging
+import os
+from urllib.parse import parse_qsl, urlparse, urlsplit
 import paramiko
 
 logger = logging.getLogger(__name__)
@@ -13,19 +15,30 @@ logger = logging.getLogger(__name__)
 __all__ = ('SSHParamiko')
 
 class SSHParamiko(object):
-    def __init__(self, sftp_cfg : dict):
+    def __init__(self, sshfs_url : dict):
         """Open sftp session
 
         Args:
-            sftp_cfg (dict): dictionary with user/host/pass where json file stay
+             sshfs_url (str): sftp url
         """
+
+        p = urlparse(sshfs_url)
+        if p.scheme != 'sftp':
+            raise Exception('URI wrong schemma')
+
+        self.params = dict(parse_qsl(urlsplit(sshfs_url).query))
 
         self.ssh = paramiko.SSHClient()
         self.ssh.load_system_host_keys()
-        self.ssh.connect(hostname=sftp_cfg['host'],
-                         username=sftp_cfg['user'],
-                         password=sftp_cfg['passwd'],
+        self.ssh.connect(hostname=p.hostname,
+                         username=p.username,
+                         password=p.password,
                          allow_agent=False)
+
+        self.remote, f = os.path.split(p.path)
+        #self.path_node = path_mng.reserv()
+        self.filename = f #os.path.join(self.path_node.get_path(), f) if f else ''
+
 
         self.sftp = self.ssh.open_sftp()
         self.is_online = True
@@ -39,6 +52,9 @@ class SSHParamiko(object):
         """
 
         return self.path_remoto
+
+    def get_path_filename(self) -> str:
+        return self.filename
 
     def get_path(self, path : str) -> str:
         """returns directory plus the parameter, and creates the same if there is no
@@ -62,6 +78,17 @@ class SSHParamiko(object):
     def __enter__(self):
         """Use as a context manager."""
 
+        loc = self.get_local()
+        if 'dir' in self.params:
+            new_path = self.params['dir']
+            if len(new_path) > 0:
+                loc = self.get_path(new_path)
+
+        if 'file' in self.params:
+            filename = self.params['file']
+            if len(filename) > 0:
+                self.filename = filename #os.path.join(loc, filename)
+
         return self
 
     def __exit__(self, *err):
@@ -83,6 +110,9 @@ class SSHParamiko(object):
                 self.ssh.close()
             except (Exception) as exp:
                 pass
+
+    def write_json_url(self, rec : dict) -> bool:
+        return self.write_json(rec, self.filename)
 
     def write_json(self, recordset : dict, file_name : str) -> bool:
         """Write a json file in sftp
