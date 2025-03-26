@@ -1,6 +1,6 @@
 '''
 Created on 20250307
-Update on 20250325
+Update on 20250326
 @author: Eduardo Pagotto
 '''
 
@@ -36,9 +36,7 @@ class SSHParamiko(object):
                          allow_agent=False)
 
         self.remote, f = os.path.split(p.path)
-        #self.path_node = path_mng.reserv()
-        self.filename = f #os.path.join(self.path_node.get_path(), f) if f else ''
-
+        self.filename = f
 
         self.sftp = self.ssh.open_sftp()
         self.is_online = True

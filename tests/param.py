@@ -24,7 +24,6 @@ SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:?dir=dados_db&file=paramiko.js
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
-
 logging.getLogger('paramiko').setLevel(logging.WARNING)
 logger = logging.getLogger('param')
 
@@ -33,7 +32,6 @@ def simples_write_read():
     # Teste escrita json no SFTP
     with SSHParamiko(SFTP_DATA) as remote:
 
-        #aa = remote.get_path('teste_z1')
         teste = {'nome': 'locutus', 'idade':5000}
         remote.write_json(teste, 't1.json')
 
@@ -41,7 +39,7 @@ def simples_write_read():
 
     # Teste leitura no SFTP
     with SSHParamiko(SFTP_DATA) as remote:
-        #aa = remote.get_path('teste_z1')
+
         with remote.sftp.open('t1.json', 'r') as handle:
             handle.prefetch()
             cache =  json.load(handle)

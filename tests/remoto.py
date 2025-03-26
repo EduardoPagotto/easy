@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
 Created on 20250129
-Update on 20250325
+Update on 20250326
 @author: Eduardo Pagotto
 '''
 
@@ -21,39 +21,14 @@ from easy.store import DumpStor
 from tinydb import where
 from tinydb.table import Table
 
-# params = {'dir': 'dados_db','file':'remoto.json'}
-# encoded_params = urllib.parse.urlencode(params)
-#final_url = f'{SFTP_DATA}?{encoded_params}'
-
-#SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102'
-#SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:/data/arquivo.txt'
-#SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:/home/uctest/'
-
-#SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.0.102:/home/uctest/?dir=dados_db&file=remoto.json'
-
-
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 logger = logging.getLogger('remoto')
 
-def get_env():
-    try:
-        with open('.env', 'r') as fh:
-            vars_dict = dict(
-                tuple(line.replace('\n', '').split('='))
-                for line in fh.readlines() if not line.startswith('#')
-            )
-
-        os.environ.update(vars_dict)
-    except Exception as exp:
-        logger.critical("Erro Carga de parametros")
-
 if __name__ == "__main__":
 
-    get_env()
-
-    SFTP_DATA = os.environ.get('SFTP')
+    SFTP_DATA = 'sftp://uctest:Zaq12wsX@192.168.1.214'
 
     path_mng = PathLocalMng(4)
 
@@ -61,7 +36,6 @@ if __name__ == "__main__":
     with SSHFS(SFTP_DATA, False, path_mng) as mnt_remote:
 
         path_db = mnt_remote.get_path('dados_db')
-        #path_db = mnt_remote.get_local()
 
         with JsonDB(path_db, 'remoto', storage=DumpStor) as db_remote:
 

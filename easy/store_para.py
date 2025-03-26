@@ -115,8 +115,6 @@ class DumpStorParamiko(Storage):
             self.tot_read += self.last_read
             self.cache['_SystemDB'] = {'reads': self.tot_read, 'writes':self.tot_write,'last_save':datetime.now().isoformat()}
 
-            #sftp.get_path(self.path_remoto)
-
             if sftp.write_json(self.cache, path_filename):
                 self.exist_file = True
                 self._cache_modified_count = 0

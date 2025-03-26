@@ -1,6 +1,6 @@
 '''
 Created on 20241209
-Update on 20250325
+Update on 20250326
 @author: Eduardo Pagotto
 '''
 
@@ -10,7 +10,7 @@ import os
 import time
 from pathlib import Path
 import subprocess
-from urllib.parse import urlparse, parse_qs, urlsplit, parse_qsl
+from urllib.parse import urlparse, urlsplit, parse_qsl
 
 from easy.path_mng import PathLocalMng
 
